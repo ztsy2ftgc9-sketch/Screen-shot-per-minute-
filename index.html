@@ -2,11 +2,11 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>SMC Auto Scanner</title>
+    <title>SMC Auto Sender</title>
     <style>
         body { text-align: center; font-family: Arial, sans-serif; background: #111; color: white; }
-        video { width: 90%; max-width: 500px; border-radius: 10px; border: 2px solid #00ffcc; margin-top: 20px; }
-        #status { color: #00ffcc; font-size: 18px; margin-top: 15px; }
+        video { width: 95%; max-width: 500px; border-radius: 10px; border: 2px solid #00ffcc; margin-top: 20px; }
+        #status { color: #00ffcc; font-size: 18px; margin-top: 15px; padding: 0 10px; }
     </style>
 </head>
 <body>
@@ -21,47 +21,60 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        // ضع هنا عنوان الـ IP الخاص بلابتوبك (مثال: [http://111.111.1.11:5000/upload](http://111.111.1.11:5000/upload))
-        const SERVER_URL = "http://YOUR_LAPTOP_IP:5000/upload"; 
+        // 1. ضع معلومات البوت وحسابك هنا مباشرة:
+        const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
+        const MY_CHAT_ID = "5352762124"; 
 
-        // 1. فتح كاميرا الآيباد الخلفية تلقائياً
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+        // تفعيل الكاميرا لنظام iOS
+        const constraints = {
+            video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 video.srcObject = stream;
-                statusDiv.innerText = "📸 الكاميرا تعمل. وجهها للشارت، المسح التلقائي شغال كل 60 ثانية...";
-                // بدء التقاط الصور تلقائياً كل دقيقة (60000 ميلي ثانية)
-                setInterval(captureAndSend, 60000);
+                video.setAttribute('playsinline', true);
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
+                
+                // بدء اللقط والإرسال التلقائي كل 60 ثانية
+                setInterval(captureAndSendToTelegram, 60000);
             })
             .catch(err => {
-                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا: " + err;
+                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
             });
 
-        // 2. دالة اللقط والإرسال التلقائي دون لمس أي زر
-        function captureAndSend() {
-            statusDiv.innerText = "⏳ جاري لقط الشارت وإرساله للسيرفر للتحليل...";
+        // دالة اللقط والإرسال المباشر إلى سيرفرات تليجرام
+        function captureAndSendToTelegram() {
+            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى المحادثة...";
             
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // تحويل اللقطة إلى ملف وإرسالها عبر الـ API للابتوب
+            // تحويل الصورة وضغطها بجودة 70% لحل إيرور 429
             canvas.toBlob(blob => {
                 const formData = new FormData();
+                formData.append('chat_id', MY_CHAT_ID);
                 formData.append('photo', blob, 'chart.jpg');
                 
-                fetch(SERVER_URL, { method: 'POST', body: formData })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.status === "success") {
-                            statusDiv.innerText = "✅ تم الإرسال والتحليل بنجاح! النتيجة وصلت تليجرام. جاري الاستعداد للمسحة القادمة...";
-                        } else {
-                            statusDiv.innerText = "❌ فشل في السيرفر: " + data.message;
-                        }
-                    })
-                    .catch(err => {
-                        statusDiv.innerText = "❌ خطأ في الاتصال باللابتوب: " + err;
-                    });
+                // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالتليجرام
+                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.ok) {
+                        statusDiv.innerText = "✅ تم إرسال الصورة للشات بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليلها...";
+                    } else {
+                        statusDiv.innerText = "❌ فشل إرسال الصورة للتليجرام: " + data.description;
+                    }
+                })
+                .catch(err => {
+                    statusDiv.innerText = "❌ خطأ في الاتصال بالإنترنت: " + err;
+                });
             }, 'image/jpeg', 0.7);
         }
     </script>
