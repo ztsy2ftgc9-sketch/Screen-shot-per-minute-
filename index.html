@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>SMC Auto Scanner</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background: #111; color: white; }
+        video { width: 90%; max-width: 500px; border-radius: 10px; border: 2px solid #00ffcc; margin-top: 20px; }
+        #status { color: #00ffcc; font-size: 18px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد</h2>
+    <video id="video" autoplay playsinline></video>
+    <div id="status">جاري تشغيل الكاميرا التلقائية...</div>
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const statusDiv = document.getElementById('status');
+        
+        // ضع هنا عنوان الـ IP الخاص بلابتوبك (مثال: [http://111.111.1.11:5000/upload](http://111.111.1.11:5000/upload))
+        const SERVER_URL = "http://YOUR_LAPTOP_IP:5000/upload"; 
+
+        // 1. فتح كاميرا الآيباد الخلفية تلقائياً
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+            .then(stream => {
+                video.srcObject = stream;
+                statusDiv.innerText = "📸 الكاميرا تعمل. وجهها للشارت، المسح التلقائي شغال كل 60 ثانية...";
+                // بدء التقاط الصور تلقائياً كل دقيقة (60000 ميلي ثانية)
+                setInterval(captureAndSend, 60000);
+            })
+            .catch(err => {
+                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا: " + err;
+            });
+
+        // 2. دالة اللقط والإرسال التلقائي دون لمس أي زر
+        function captureAndSend() {
+            statusDiv.innerText = "⏳ جاري لقط الشارت وإرساله للسيرفر للتحليل...";
+            
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // تحويل اللقطة إلى ملف وإرسالها عبر الـ API للابتوب
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('photo', blob, 'chart.jpg');
+                
+                fetch(SERVER_URL, { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.status === "success") {
+                            statusDiv.innerText = "✅ تم الإرسال والتحليل بنجاح! النتيجة وصلت تليجرام. جاري الاستعداد للمسحة القادمة...";
+                        } else {
+                            statusDiv.innerText = "❌ فشل في السيرفر: " + data.message;
+                        }
+                    })
+                    .catch(err => {
+                        statusDiv.innerText = "❌ خطأ في الاتصال باللابتوب: " + err;
+                    });
+            }, 'image/jpeg', 0.7);
+        }
+    </script>
+</body>
+</html>
