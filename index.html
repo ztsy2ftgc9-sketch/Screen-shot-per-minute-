@@ -21,9 +21,11 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        const TELEGRAM_TOKEN = "8955930222:AAGNk2x0EymONbeh25RxKYByh1NSFbSbiUE"; 
-        const MY_CANNEL_ID = "-1004242636129"; 
+        // 1. ضع معلومات البوت وحسابك هنا مباشرة:
+        const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
+        const MY_CHAT_ID = "5352762124"; 
 
+        // تفعيل الكاميرا لنظام iOS
         const constraints = {
             video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
@@ -33,14 +35,16 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح خخ! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
                 
+                // بدء اللقط والإرسال التلقائي كل 60 ثانية
                 setInterval(captureAndSendToTelegram, 60000);
             })
             .catch(err => {
-                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد.";
+                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
             });
 
+        // دالة اللقط والإرسال المباشر إلى سيرفرات تليجرام
         function captureAndSendToTelegram() {
             statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى المحادثة...";
             
@@ -49,11 +53,13 @@
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
+            // تحويل الصورة وضغطها بجودة 70% لحل إيرور 429
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('chat_id', MY_CHAT_ID);
                 formData.append('photo', blob, 'chart.jpg');
                 
+                // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالتليجرام
                 fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
                     method: 'POST',
                     body: formData
