@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (إرسال للقناة)</h2>
+    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد</h2>
     <video id="video" autoplay playsinline></video>
     <div id="status">جاري تشغيل الكاميرا التلقائية...</div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -21,13 +21,9 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        // توكن البوت الخاص بك كما هو
         const TELEGRAM_TOKEN = "8955930222:AAGNk2x0EymONbeh25RxKYByh1NSFbSbiUE"; 
-        
-        // تم وضع معرف قناتك هنا وتجهيزه برمجياً بصيغة القنوات
-        const MY_CHAT_ID = "-1004242636129"; 
+        const MY_CHAT_ID = "5352762124"; 
 
-        // إعدادات الكاميرا لنظام iOS
         const constraints = {
             video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
@@ -37,31 +33,27 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال تلقائياً إلى القناة...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
                 
-                // بدء اللقط والإرسال التلقائي كل 60 ثانية
                 setInterval(captureAndSendToTelegram, 60000);
             })
             .catch(err => {
-                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
+                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد.";
             });
 
-        // دالة اللقط والإرسال المباشر إلى القناة
         function captureAndSendToTelegram() {
-            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى القناة...";
+            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى المحادثة...";
             
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // تحويل اللقطة وصورتها بجودة 85% وهي واضحة جداً وممتازة لتحليل الذكاء الاصطناعي
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('chat_id', MY_CHAT_ID);
-                formData.append('photo', blob, 'chart.jpg'); 
+                formData.append('photo', blob, 'chart.jpg');
                 
-                // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالقنوات
                 fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
                     method: 'POST',
                     body: formData
@@ -69,15 +61,15 @@
                 .then(res => res.json())
                 .then(data => {
                     if(data.ok) {
-                        statusDiv.innerText = "✅ تم إرسال الشارت إلى القناة بنجاح! انتظر تحليل كود اللابتوب...";
+                        statusDiv.innerText = "✅ تم إرسال الصورة للشات بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليلها...";
                     } else {
-                        statusDiv.innerText = "❌ فشل إرسال الصورة للقناة: " + data.description;
+                        statusDiv.innerText = "❌ فشل إرسال الصورة للتليجرام: " + data.description;
                     }
                 })
                 .catch(err => {
                     statusDiv.innerText = "❌ خطأ في الاتصال بالإنترنت: " + err;
                 });
-            }, 'image/jpeg', 0.85); 
+            }, 'image/jpeg', 0.7);
         }
     </script>
 </body>
