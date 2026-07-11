@@ -25,7 +25,7 @@
         const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
         const CHANNEL_USERNAME = "@dodooddoo"; 
 
-        // hتفعيل الكاميرا لنظام iOS
+        // تفعيل الكاميرا لنظام iOS
         const constraints = {
             video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
@@ -35,16 +35,16 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها حب للشارت وسيقوم  بالإرسال كل دقيقة تلقائياً...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
                 
-                // بدءh اللقط والإرسالi التلقائي كل 60 ثانية
-                setInterval(captureAndSendToTelegram, 10000);
+                // بدء اللقط والإرسال التلقائي كل 60 ثانية
+                setInterval(captureAndSendToTelegram, 60000);
             })
             .catch(err => {
                 statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
             });
 
-        // دالة اللقط kوالإرسال المباشر إلى سيرفرات تليجرام
+        // دالة اللقط والإرسال المباشر إلى سيرفرات تليجرام
         function captureAndSendToTelegram() {
             statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى المحادثة...";
             
