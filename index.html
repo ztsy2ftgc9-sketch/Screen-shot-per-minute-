@@ -35,7 +35,7 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجههاowowo للشارت وسيقوم  بالإرسال كل دقيقة تلقائياً...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها حب للشارت وسيقوم  بالإرسال كل دقيقة تلقائياً...";
                 
                 // بدءh اللقط والإرسالi التلقائي كل 60 ثانية
                 setInterval(captureAndSendToTelegram, 10000);
