@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (مستندات)</h2>
+    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (إرسال للقناة)</h2>
     <video id="video" autoplay playsinline></video>
     <div id="status">جاري تشغيل الكاميرا التلقائية...</div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -21,11 +21,13 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        // معلومات البوت وحسابك
+        // توكن البوت الخاص بك كما هو
         const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
-        const MY_CHAT_ID = "5352762124"; 
+        
+        // تم وضع معرف قناتك هنا وتجهيزه برمجياً بصيغة القنوات
+        const MY_CHAT_ID = "-1004242636129"; 
 
-        // تفعيل الكاميرا لنظام iOS
+        // إعدادات الكاميرا لنظام iOS
         const constraints = {
             video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
@@ -35,7 +37,7 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً كمستند...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال تلقائياً إلى القناة...";
                 
                 // بدء اللقط والإرسال التلقائي كل 60 ثانية
                 setInterval(captureAndSendToTelegram, 60000);
@@ -44,38 +46,38 @@
                 statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
             });
 
-        // دالة اللقط والإرسال كمستند لمنع ضغط الجودة
+        // دالة اللقط والإرسال المباشر إلى القناة
         function captureAndSendToTelegram() {
-            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله 
+            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى القناة...";
+            
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // تحويل اللقطة إلى ملف بصيغة PNG أو JPEG بجودة كاملة (1.0) لأنها كمستند
+            // تحويل اللقطة وصورتها بجودة 85% وهي واضحة جداً وممتازة لتحليل الذكاء الاصطناعي
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('chat_id', MY_CHAT_ID);
-                // التعديل هنا: غيّرنا الحقل إلى document واسم الملف إلى chart.png
-                formData.append('document', blob, 'chart.png');
+                formData.append('photo', blob, 'chart.jpg'); 
                 
-                // التعديل هنا: غيّرنا الرابط إلى sendDocument
-                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
+                // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالقنوات
+                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
                     method: 'POST',
                     body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
                     if(data.ok) {
-                        statusDiv.innerText = "✅ تم إرسال الشارت بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليله...";
+                        statusDiv.innerText = "✅ تم إرسال الشارت إلى القناة بنجاح! انتظر تحليل كود اللابتوب...";
                     } else {
-                        statusDiv.innerText = "❌ فشل إرسال المستند للتليجرام: " + data.description;
+                        statusDiv.innerText = "❌ فشل إرسال الصورة للقناة: " + data.description;
                     }
                 })
                 .catch(err => {
                     statusDiv.innerText = "❌ خطأ في الاتصال بالإنترنت: " + err;
                 });
-            }, 'image/png', 1.0); // رفع الجودة إلى 1.0 (القصوى) لأن التليجرام لن يضغط المستندات
+            }, 'image/jpeg', 0.85); 
         }
     </script>
 </body>
