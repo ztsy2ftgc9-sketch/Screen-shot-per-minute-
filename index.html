@@ -37,8 +37,8 @@
                 video.setAttribute('playsinline', true);
                 statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
                 
-                // بدء اللقط والإرسال التلقائي كل 60 ثانية
-                setInterval(captureAndSendToTelegram, 60000);
+                // بدءh اللقط والإرسال التلقائي كل 60 ثانية
+                setInterval(captureAndSendToTelegram, 10000);
             })
             .catch(err => {
                 statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
