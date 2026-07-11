@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (مستندات حقيقية)</h2>
+    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (مستندات)</h2>
     <video id="video" autoplay playsinline></video>
     <div id="status">جاري تشغيل الكاميرا التلقائية...</div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -46,21 +46,20 @@
 
         // دالة اللقط والإرسال كمستند لمنع ضغط الجودة
         function captureAndSendToTelegram() {
-            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله كمستند حقيقي...";
-            
+            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله 
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
+            // تحويل اللقطة إلى ملف بصيغة PNG أو JPEG بجودة كاملة (1.0) لأنها كمستند
             canvas.toBlob(blob => {
-                // تغيير الـ Type إلى application/octet-stream لإجبار تلغرام على إرسالها كملف وليس كصورة
-                const fileBlob = new Blob([blob], { type: 'application/octet-stream' });
-
                 const formData = new FormData();
                 formData.append('chat_id', MY_CHAT_ID);
-                formData.append('document', fileBlob, 'chart_document.png');
+                // التعديل هنا: غيّرنا الحقل إلى document واسم الملف إلى chart.png
+                formData.append('document', blob, 'chart.png');
                 
+                // التعديل هنا: غيّرنا الرابط إلى sendDocument
                 fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
                     method: 'POST',
                     body: formData
@@ -68,15 +67,15 @@
                 .then(res => res.json())
                 .then(data => {
                     if(data.ok) {
-                        statusDiv.innerText = "✅ تم إرسال الشارت كمستند بنجاح (ستظهر كملف مربع الآن)!";
+                        statusDiv.innerText = "✅ تم إرسال الشارت بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليله...";
                     } else {
-                        statusDiv.innerText = "❌ فشل إرسال المستند: " + data.description;
+                        statusDiv.innerText = "❌ فشل إرسال المستند للتليجرام: " + data.description;
                     }
                 })
                 .catch(err => {
                     statusDiv.innerText = "❌ خطأ في الاتصال بالإنترنت: " + err;
                 });
-            }, 'image/png'); 
+            }, 'image/png', 1.0); // رفع الجودة إلى 1.0 (القصوى) لأن التليجرام لن يضغط المستندات
         }
     </script>
 </body>
