@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد</h2>
+    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (مستندات)</h2>
     <video id="video" autoplay playsinline></video>
     <div id="status">جاري تشغيل الكاميرا التلقائية...</div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -21,7 +21,7 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        // 1. ضع معلومات البوت وحسابك هنا مباشرة:
+        // معلومات البوت وحسابك
         const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
         const MY_CHAT_ID = "5352762124"; 
 
@@ -35,7 +35,7 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً كمستند...";
                 
                 // بدء اللقط والإرسال التلقائي كل 60 ثانية
                 setInterval(captureAndSendToTelegram, 60000);
@@ -44,38 +44,39 @@
                 statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
             });
 
-        // دالة اللقط والإرسال المباشر إلى سيرفرات تليجرام
+        // دالة اللقط والإرسال كمستند لمنع ضغط الجودة
         function captureAndSendToTelegram() {
-            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى المحادثة...";
+            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله كمستند...";
             
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // تحويل الصورة وضغطها بجودة 70% لحل إيرور 429
+            // تحويل اللقطة إلى ملف بصيغة PNG أو JPEG بجودة كاملة (1.0) لأنها كمستند
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('chat_id', MY_CHAT_ID);
-                formData.append('photo', blob, 'chart.jpg');
+                // التعديل هنا: غيّرنا الحقل إلى document واسم الملف إلى chart.png
+                formData.append('document', blob, 'chart.png');
                 
-                // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالتليجرام
-                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+                // التعديل هنا: غيّرنا الرابط إلى sendDocument
+                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
                     method: 'POST',
                     body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
                     if(data.ok) {
-                        statusDiv.innerText = "✅ تم إرسال الصورة للشات بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليلها...";
+                        statusDiv.innerText = "✅ تم إرسال الشارت كمستند بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليله...";
                     } else {
-                        statusDiv.innerText = "❌ فشل إرسال الصورة للتليجرام: " + data.description;
+                        statusDiv.innerText = "❌ فشل إرسال المستند للتليجرام: " + data.description;
                     }
                 })
                 .catch(err => {
                     statusDiv.innerText = "❌ خطأ في الاتصال بالإنترنت: " + err;
                 });
-            }, 'image/jpeg', 0.7);
+            }, 'image/png', 1.0); // رفع الجودة إلى 1.0 (القصوى) لأن التليجرام لن يضغط المستندات
         }
     </script>
 </body>
