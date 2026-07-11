@@ -22,7 +22,7 @@
         const statusDiv = document.getElementById('status');
         
         const TELEGRAM_TOKEN = "8955930222:AAGNk2x0EymONbeh25RxKYByh1NSFbSbiUE"; 
-        const MY_CHAT_ID = "-1004242636129"; 
+        const MY_CANNEL_ID = "-1004242636129"; 
 
         const constraints = {
             video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -33,9 +33,9 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
+                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح خخ! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
                 
-                setInterval(captureAndSendToTelegram, 10000);
+                setInterval(captureAndSendToTelegram, 60000);
             })
             .catch(err => {
                 statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد.";
