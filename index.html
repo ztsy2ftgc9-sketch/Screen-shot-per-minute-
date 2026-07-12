@@ -21,9 +21,9 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        // معلومات البوت والقناة الخاصة بك
+        // تعديل التوكن والمعرف وتوحيد الأسماء لحل الأخطاء البرمجية
         const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
-        const MY_CHAT_ID = "@dodooddoo"; // تأكد أن البوت "أدمن" في هذه القناة وله صلاحية نشر الصور
+        const CHAT_ID = "123123"; // تم تصحيح علامات الاقتباس هنا
 
         // تفعيل الكاميرا لنظام iOS
         const constraints = {
@@ -37,7 +37,7 @@
                 video.setAttribute('playsinline', true);
                 statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
                 
-                // بدء اللقط والإرسال التلقائي كل 60 ثانية
+                // بدء اللقط والإرسال التلقائي كل 60 ثانية (دقيقة)
                 setInterval(captureAndSendToTelegram, 60000);
             })
             .catch(err => {
@@ -53,10 +53,10 @@
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // تحويل الصورة وضغطها بجودة 70%
+            // تحويل الصورة وضغطها بجودة 70% لحل إيرور 429 وتقليل حجم البيانات
             canvas.toBlob(blob => {
                 const formData = new FormData();
-                formData.append('chat_id', MY_CHAT_ID); // تم إصلاح المتغير هنا ليرسل للقناة مباشرة
+                formData.append('chat_id', CHAT_ID); // تم تصحيح المتغير هنا ليتطابق مع التعريف فوق
                 formData.append('photo', blob, 'chart.jpg');
                 
                 // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالتليجرام
