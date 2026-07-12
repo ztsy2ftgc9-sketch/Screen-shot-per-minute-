@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <h2> ماسح الشارت التلقائي لـ الآيباد</h2>
+    <h2>🤖 ماسح الشارت التلقائي لـ الآيباد (Direct Link)</h2>
     <video id="video" autoplay playsinline></video>
     <div id="status">جاري تشغيل الكاميرا التلقائية...</div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -21,11 +21,10 @@
         const canvas = document.getElementById('canvas');
         const statusDiv = document.getElementById('status');
         
-        // تعديل التوكن والمعرف وتوحيد الأسماء لحل الأخطاء البرمجية
-        const TELEGRAM_TOKEN = "8956200597:AAFF--lA3lKfmoZnZ_qWH5fTsmNgPBxPV-Q"; 
-        const CHAT_ID = "5352762124"; // تم تصحيح علامات الاقتباس هنا
+        // 1. ضع عنوان الـ IP الخاص باللابتوب هنا (تأكد أن الآيباد واللابتوب على نفس الواي فاي)
+        const LAPTOP_IP = "192.168.1.50"; // <--- غير هذا إلى الـ IP الخاص بلابتوبك
+        const SERVER_URL = `http://${LAPTOP_IP}:5000/upload_chart`;
 
-        // تفعيل الكاميرا لنظام iOS
         const constraints = {
             video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
@@ -35,45 +34,41 @@
             .then(stream => {
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true);
-                statusDiv.innerText = "📸 الكاميرا تعمل بنجاح! وجهها للشارت وسيقوم التطبيق بالإرسال كل دقيقة تلقائياً...";
+                statusDiv.innerText = "📸 الكاميرا تعمل! يتم الإرسال مباشرة للابتوب كل دقيقة...";
                 
-                // بدء اللقط والإرسال التلقائي كل 60 ثانية (دقيقة)
-                setInterval(captureAndSendToTelegram, 60000);
+                setInterval(captureAndSendDirectly, 60000);
             })
             .catch(err => {
-                statusDiv.innerText = "❌ خطأ في تشغيل الكاميرا. تأكد من إعطاء الصلاحية من إعدادات الآيباد وتطبيق تليجرام.";
+                statusDiv.innerText = "❌ خطأ في الكاميرا. تأكد من الصلاحيات.";
             });
 
-        // دالة اللقط والإرسال المباشر إلى سيرفرات تليجرام
-        function captureAndSendToTelegram() {
-            statusDiv.innerText = "⏳ جاري لقط الشارت الآن وإرساله إلى المحادثة...";
+        function captureAndSendDirectly() {
+            statusDiv.innerText = "⏳ جاري لقط الشارت وإرساله للابتوب فوراً...";
             
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // تحويل الصورة وضغطها بجودة 70% لحل إيرور 429 وتقليل حجم البيانات
             canvas.toBlob(blob => {
                 const formData = new FormData();
-                formData.append('chat_id', CHAT_ID); // تم تصحيح المتغير هنا ليتطابق مع التعريف فوق
                 formData.append('photo', blob, 'chart.jpg');
                 
-                // إرسال الصورة مباشرة إلى رابط الـ API الخاص بالتليجرام
-                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+                // إرسال مباشر إلى سيرفر اللابتوب
+                fetch(SERVER_URL, {
                     method: 'POST',
                     body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.ok) {
-                        statusDiv.innerText = "✅ تم إرسال الصورة للشات بنجاح! انتظر ثواني ليقوم كود اللابتوب بتحليلها...";
+                    if(data.status === "success") {
+                        statusDiv.innerText = "✅ تم الاستلام والتحليل بنجاح! تفقد حسابك بالتليجرام لتشاهد النتيجة.";
                     } else {
-                        statusDiv.innerText = "❌ فشل إرسال الصورة للتليجرام: " + data.description;
+                        statusDiv.innerText = "❌ فشل اللابتوب في المعالجة: " + data.message;
                     }
                 })
                 .catch(err => {
-                    statusDiv.innerText = "❌ خطأ في الاتصال بالإنترنت: " + err;
+                    statusDiv.innerText = "❌ خطأ في الاتصال باللابتوب. تأكد من الـ IP وأن السيرفر يعمل: " + err;
                 });
             }, 'image/jpeg', 0.7);
         }
